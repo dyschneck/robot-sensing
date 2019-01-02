@@ -1,0 +1,69 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+vector<double> sense(vector<double> p, string Z);
+
+vector<double> move(vector<double>, int U);
+
+vector<double> p(5, 0.2);
+vector<string> world = { "green", "red", "red", "green", "green" };
+vector<string> measurement = { "red", "green" };
+vector<int> motions(2, 1);
+double pHit = 0.6;
+double pMiss = 0.2;
+double pExact = 0.8;
+double pOvershoot = 0.1;
+double pUndershoot = 0.1;
+
+int main() {
+
+	for (int i = 0; i < measurement.size(); i++) {
+		p = sense(p, measurement[i]);
+		p = move(p, motions[i]);
+	}
+
+	for (int j = 0; j < p.size(); j++) {
+		cout << p[j] << endl;
+	}
+	/*
+	cout << "Encouraging message " << p[4] << " " << world[1] << 
+		" " << measurement[0] << " " << motions[0] << " " << pHit << " " << pExact << " "
+		<< pMiss << " " << pOvershoot << " " << pUndershoot
+		<< " " << "This is p: ";
+
+	*/
+
+	return 0;
+}
+
+vector<double> sense(vector<double> p, string Z) {
+	vector<double> q(0);
+	for (int i = 0; i < p.size(); i++) {
+		bool hit = (Z == world[i]);
+		q.push_back(p[i] * (hit * pHit + (1 - hit) * pMiss));
+	}
+	double sum = 0;
+	for (int j = 0; j < q.size(); j++){
+		sum = sum + q[j];
+		}
+	for (int k = 0; k < q.size(); k++) {
+		q[k] = q[k]/sum;
+	}
+	// cout << "need more encouragement  ";
+
+	return q;
+}
+
+vector<double> move(vector<double>, int U) {
+	vector<double> q(0);
+	for (int i = 0; i < p.size(); i++) {
+		double s = pExact * p[(i - U) % p.size()];
+		s = s + pOvershoot * p[(i - U - 1) % p.size()];
+		s = s + pUndershoot * p[(i - U + 1) % p.size()];
+		q.push_back(s);
+	}
+	return q;
+}
